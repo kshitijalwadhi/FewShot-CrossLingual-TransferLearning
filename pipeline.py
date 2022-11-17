@@ -71,15 +71,7 @@ if  __name__ == "__main__":
 
     # Load the language adapters
     lang_adapter_config = AdapterConfig.load("pfeiffer", reduction_factor=2)
-
-    hindi = hindi + urdu
     
-
-    # combined_lang_heads 
-    combs = {"en": ["en", "es", "fr"],
-            "hi" : ["hi" , "ur"],
-            
-    }
 
     # load all language adapters 
     lang_adapters = {
@@ -131,16 +123,13 @@ if  __name__ == "__main__":
         try:
             model.load_adapter(lang_adapters[lang], config=lang_adapter_config)
             model.train_adapter(["nli"])
+            model.active_adapters = Stack(lang, "nli")
         except:
-            try:
-                model.load_adapter(f"adapters_trained/{lang_adapters[lang]}")
-                model.train_adapter(["nli"])
-            except:
-                model.add_adapter(lang_adapters[lang], config = lang_adapter_config)
-                model.train_adapter([lang_adapters[lang],"nli"])
-                model.save_adapter("adapters_trained/", lang_adapters[lang], config=lang_adapter_config)
-            
-        model.active_adapters = Stack(lang, "nli")
+            model.add_adapter(lang_adapters[lang], config = lang_adapter_config)
+            model.train_adapter([lang_adapters[lang],"nli"])
+            model.save_adapter("adapters_trained/", lang_adapters[lang])
+            model.train_adapter(["nli"])
+            model.active_adapters = Stack(lang_adapters[lang], "nli")
 
         training_args = TrainingArguments(
             learning_rate=1e-4,
@@ -167,7 +156,7 @@ if  __name__ == "__main__":
         eval_trainer = AdapterTrainer(
         model=model,
         args=TrainingArguments(output_dir="./eval_output", remove_unused_columns=False,),
-        eval_dataset=dataset_en["test"],
+        eval_dataset=dataset_en,
         compute_metrics=compute_accuracy,
         )
         eval_trainer.evaluate()
