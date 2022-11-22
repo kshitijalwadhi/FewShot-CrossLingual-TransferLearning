@@ -1,0 +1,20 @@
+1) Deal with noises :-
+
+For example :- 
+
+  In the training examples for the Hindi language, some sentences are in English script. Is this error or sentences can be in any script?
+  Screenshot_20221103_160604.png
+  helpful! 0
+  Vipul Kumar Rathore 3 weeks ago
+  This is a common noise in the datasets that you should deal with. We didn't add any artifacts on our own.
+  
+  How to tackle : Detect language of premise/hypothesis, and overwrite language in dataset
+  
+2) Combine similar languages together (Train together)
+
+3) Fine tune model on en dataset
+
+4) Crosscheck accuracy with translations pipeline
+  
+ 
+
