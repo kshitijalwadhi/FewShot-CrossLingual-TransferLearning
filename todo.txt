@@ -15,6 +15,9 @@ For example :-
 3) Fine tune model on en dataset
 
 4) Crosscheck accuracy with translations pipeline
+
+(IMPORTANT) 5) Train only on high resource language, English! (Finetune on high resource language at training). 
+               At Test time, replace language adapter with language of choice, even better use attention of different adapters at inference and train attention! (Use low-resource langugaes to train attention)
   
  
 
