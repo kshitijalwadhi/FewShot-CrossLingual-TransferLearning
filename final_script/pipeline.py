@@ -76,6 +76,9 @@ if __name__ == "__main__":
 
     print("Evaluating on test data")
 
+    translate_model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M")
+    translate_tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M")
+
     config = AutoConfig.from_pretrained(
         "xlm-roberta-base",
     )
@@ -93,6 +96,9 @@ if __name__ == "__main__":
     acc = {}
 
     for lang in languages:
+        # using adapters
         acc[lang] = eval_one_lang(model, lang, train_data, test_data, lang_adapters, lang_adapter_config)
+        # if using translation
+        # acc[lang] = eval_one_lang_translate(model, lang, test_data, translate_model, translate_tokenizer)
 
     print(acc)

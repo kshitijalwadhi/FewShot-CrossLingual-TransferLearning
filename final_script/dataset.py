@@ -69,6 +69,44 @@ def make_dataset(df, lang):
     return dataset_en
 
 
+def translate(text_list, lang, translate_model, translate_tokenizer):
+    translate_tokenizer.src_lang = lang
+    encoded_lang = translate_tokenizer(text_list, return_tensors="pt", padding=True)
+    generated_tokens = translate_model.generate(**encoded_lang, forced_bos_token_id=translate_tokenizer.get_lang_id("en"))
+    output = translate_tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+    return output
+
+
+def make_dataset_with_translate(df, lang, translate_model, translate_tokenizer):
+    en_data = get_data(lang, df)
+    en_data = en_data.dropna()
+    print("Size of data for language", lang, en_data.shape)
+
+    labels = en_data["gold_label"].values
+    labels = [0 if label == "entailment" else 1 if label == "neutral" else 2 for label in labels]
+    en_data["gold_label"] = labels
+
+    premise_list = en_data["premise"].to_list()
+    hypothesis_list = en_data["hypothesis"].to_list()
+
+    translated_premise_list = []
+    translated_hypothesis_list = []
+
+    BATCH_SIZE = 8
+    for i in range(0, len(premise_list), BATCH_SIZE):
+        translated_premise_list.extend(translate(premise_list[i : i + BATCH_SIZE], lang, translate_model, translate_tokenizer))
+        translated_hypothesis_list.extend(translate(hypothesis_list[i : i + BATCH_SIZE], lang, translate_model, translate_tokenizer))
+
+    en_data["premise"] = translated_premise_list
+    en_data["hypothesis"] = translated_hypothesis_list
+
+    en_data = Dataset.from_pandas(en_data)
+    dataset_en = preprocess_dataset(en_data)
+    dataset_en = dataset_en.remove_columns(["language", "premise", "hypothesis", "__index_level_0__"])
+
+    return dataset_en
+
+
 def split_dataset(df):
     # split data into 80 and 20 in each language
 
